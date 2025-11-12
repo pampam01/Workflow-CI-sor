@@ -8,7 +8,7 @@ import os
 
 # Set nama eksperimen MLflow
 # MLflow akan membuat folder 'mlruns' untuk menyimpan data secara lokal
-mlflow.set_tracking_uri("http://127.0.0.1:5000") # Opsional, tapi disarankan# Opsional, tapi disarankan
+# mlflow.set_tracking_uri("http://127.0.0.1:5000") # Opsional, tapi disarankan# Opsional, tapi disarankan
 mlflow.set_experiment("Stroke Prediction Basic")
 
 def load_data(path):
