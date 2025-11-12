@@ -15,7 +15,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 2. Setup Conda (Menggantikan setup-python)
+    # 2. Setup Conda (termasuk Python 3.9)
     # Ini diperlukan karena MLProject Anda mereferensikan 'conda.yaml'
     - name: Set up Conda (termasuk Python 3.9)
       uses: conda-incubator/setup-miniconda@v2
@@ -28,6 +28,11 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
+
+    # 3.a Ensure conda shell functions are available in non-interactive bash
+    - name: Initialize Conda for bash
+      run: |
+        eval "$(conda shell.bash hook)"
 
     # 4. Jalankan MLflow Project
     # Perintah ini sekarang akan berhasil:
