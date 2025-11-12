@@ -69,15 +69,47 @@ jobs:
           echo "Showing MLproject-like files:"
           find . -maxdepth 2 -type f -iname "mlproject" -o -iname "MLproject" -o -iname "MLProject" -print || true
 
-      - name: Run MLflow project (point explicitly to MLProject dir)
+      - name: Start MLflow tracking server (local) and wait until ready
         shell: bash -l {0}
         run: |
           set -e
           eval "$(conda shell.bash hook)"
           conda activate mlflow-env
 
-          # Run the MLflow project that lives in the MLProject directory.
-          # IMPORTANT: ensure there is a file named exactly 'MLproject' (capitalization: M lowercase p).
+          # Ensure artifact directory exists
+          mkdir -p MLProject/mlruns
+          # Start mlflow server in background using a local sqlite DB and MLProject/mlruns as artifact root.
+          # Logs are written to mlflow-server.log for debugging.
+          nohup mlflow server \
+            --backend-store-uri sqlite:///mlflow.db \
+            --default-artifact-root "file://$(pwd)/MLProject/mlruns" \
+            --host 127.0.0.1 --port 5000 > mlflow-server.log 2>&1 &
+
+          # Wait for server to respond (timeout ~30s)
+          echo "Waiting for MLflow server on http://127.0.0.1:5000 ..."
+          for i in $(seq 1 30); do
+            if curl -sSf http://127.0.0.1:5000/ >/dev/null 2>&1; then
+              echo "MLflow server is up"
+              break
+            fi
+            sleep 1
+          done
+
+          if ! curl -sSf http://127.0.0.1:5000/ >/dev/null 2>&1; then
+            echo "MLflow server failed to start; dumping last 200 lines of log:"
+            tail -n 200 mlflow-server.log || true
+            exit 1
+          fi
+
+      - name: Run MLflow project (explicit MLProject dir)
+        shell: bash -l {0}
+        run: |
+          set -e
+          eval "$(conda shell.bash hook)"
+          conda activate mlflow-env
+
+          # IMPORTANT: mlflow.run expects a file named exactly 'MLproject' inside the MLProject directory.
+          # Make sure you renamed the file accordingly (see instructions below).
           mlflow run MLProject -P some_param=1
 
       - name: Post-job - upload artifacts/logs
@@ -89,4 +121,5 @@ jobs:
             MLProject/mlruns
             ./mlruns
             ./logs
+            mlflow-server.log
             path/to/artifacts
