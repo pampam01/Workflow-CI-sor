@@ -1,10 +1,10 @@
 name: MLflow CI Training
 
-# Trigger: Berjalan saat ada push ke branch main
+# Trigger: Berjalan saat ada push ke branch master
 on:
   push:
     branches:
-      - master
+      - master # <-- DIUBAH DARI 'main'
 
 jobs:
   train-model:
@@ -15,21 +15,25 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 2. Setup Python
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
+    # 2. Setup Conda (Menggantikan setup-python)
+    # Ini diperlukan karena MLProject Anda mereferensikan 'conda.yaml'
+    - name: Set up Conda (termasuk Python 3.9)
+      uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: '3.9'
+        auto-activate-base: true # Penting agar 'conda' dikenali
 
-    # 3. Install dependencies untuk runner (hanya MLflow)
+    # 3. Install dependencies untuk runner (terutama MLflow client)
+    # Step ini tetap diperlukan agar runner dapat menemukan perintah 'mlflow run'
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
 
     # 4. Jalankan MLflow Project
-    # Perintah ini akan otomatis:
+    # Perintah ini sekarang akan berhasil:
     # - Membaca file 'MLProject'
-    # - Membuat environment dari 'conda.yaml'
-    # - Menjalankan 'command' (python modelling.py)
+    # - Melihat 'conda_env: conda.yaml'
+    # - Menggunakan 'conda' (dari Step 2) untuk membuat env dari 'conda.yaml'
+    # - Menjalankan 'command' (python modelling.py) di dalam env baru tersebut
     - name: Run MLflow Project
       run: mlflow run MLProject/
