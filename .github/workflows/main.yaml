@@ -1,8 +1,13 @@
 name: MLflow CI Training
 
+# DIUBAH: Dibuat lebih spesifik ke branch master
 on:
   push:
+    branches:
+      - master
   pull_request:
+    branches:
+      - master
 
 jobs:
   train:
@@ -32,60 +37,39 @@ jobs:
             echo "mamba is already installed"
           fi
 
-      - name: Create conda environment and install MLflow
+      - name: Create conda environment and install dependencies
         shell: bash -l {0}
         run: |
           set -e
-          # create env with mlflow
+          # Buat env dengan python dan mlflow
           mamba create -n mlflow-env python=3.9 mlflow -c conda-forge -y
 
-          # Initialize conda for this shell and activate the env.
+          # Aktifkan env
           eval "$(conda shell.bash hook)"
           conda activate mlflow-env
 
-          # Install pip requirements inside the activated env if any
+          # Install requirements dari file
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
 
-      - name: Verify mlflow and show environment
+      - name: Start MLflow tracking server (local) and wait
         shell: bash -l {0}
         run: |
           set -e
           eval "$(conda shell.bash hook)"
           conda activate mlflow-env
 
-          echo "MLflow and python versions:"
-          mlflow --version || true
-          python -c "import sys; print(sys.executable)"
-
-      - name: Show MLProject directory (debug)
-        shell: bash -l {0}
-        run: |
-          echo "Listing repo root:"
-          ls -la
-          echo "Listing MLProject directory (if exists):"
-          ls -la MLProject || true
-          echo "Showing MLproject-like files:"
-          find . -maxdepth 2 -type f -iname "mlproject" -o -iname "MLproject" -o -iname "MLProject" -print || true
-
-      - name: Start MLflow tracking server (local) and wait until ready
-        shell: bash -l {0}
-        run: |
-          set -e
-          eval "$(conda shell.bash hook)"
-          conda activate mlflow-env
-
-          # Ensure artifact directory exists
+          # Pastikan artifact directory ada
           mkdir -p MLProject/mlruns
-          # Start mlflow server in background using a local sqlite DB and MLProject/mlruns as artifact root.
-          # Logs are written to mlflow-server.log for debugging.
+          
+          # Jalankan server di background
           nohup mlflow server \
             --backend-store-uri sqlite:///mlflow.db \
             --default-artifact-root "file://$(pwd)/MLProject/mlruns" \
             --host 127.0.0.1 --port 5000 > mlflow-server.log 2>&1 &
 
-          # Wait for server to respond (timeout ~30s)
+          # Tunggu server siap
           echo "Waiting for MLflow server on http://127.0.0.1:5000 ..."
           for i in $(seq 1 30); do
             if curl -sSf http://127.0.0.1:5000/ >/dev/null 2>&1; then
@@ -95,8 +79,9 @@ jobs:
             sleep 1
           done
 
+          # Jika gagal, tampilkan log dan exit
           if ! curl -sSf http://127.0.0.1:5000/ >/dev/null 2>&1; then
-            echo "MLflow server failed to start; dumping last 200 lines of log:"
+            echo "MLflow server failed to start; dumping log:"
             tail -n 200 mlflow-server.log || true
             exit 1
           fi
@@ -108,9 +93,8 @@ jobs:
           eval "$(conda shell.bash hook)"
           conda activate mlflow-env
 
-          # IMPORTANT: mlflow.run expects a file named exactly 'MLproject' inside the MLProject directory.
-          # Make sure you renamed the file accordingly (see instructions below).
-          mlflow run MLProject -P some_param=1
+          # DIUBAH: Menambahkan --experiment-name untuk memperbaiki error
+          mlflow run MLProject --experiment-name "Stroke Prediction Basic" -P some_param=1
 
       - name: Post-job - upload artifacts/logs
         if: always()
@@ -119,7 +103,5 @@ jobs:
           name: mlflow-logs
           path: |
             MLProject/mlruns
-            ./mlruns
-            ./logs
             mlflow-server.log
-            path/to/artifacts
+            mlflow.db
