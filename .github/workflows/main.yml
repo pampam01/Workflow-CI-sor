@@ -1,0 +1,35 @@
+name: MLflow CI Training
+
+# Trigger: Berjalan saat ada push ke branch main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  train-model:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout kode repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Setup Python
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # 3. Install dependencies untuk runner (hanya MLflow)
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    # 4. Jalankan MLflow Project
+    # Perintah ini akan otomatis:
+    # - Membaca file 'MLProject'
+    # - Membuat environment dari 'conda.yaml'
+    # - Menjalankan 'command' (python modelling.py)
+    - name: Run MLflow Project
+      run: mlflow run MLProject/
