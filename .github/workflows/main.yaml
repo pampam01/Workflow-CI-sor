@@ -25,8 +25,6 @@ jobs:
         shell: bash -l {0}
         run: |
           set -e
-          # If mamba is not on PATH (sometimes setup-miniconda doesn't expose it),
-          # install it into the base environment using conda which should be present.
           if ! command -v mamba >/dev/null 2>&1; then
             echo "mamba not found — installing mamba into base environment..."
             conda install -n base -c conda-forge mamba -y
@@ -38,35 +36,41 @@ jobs:
         shell: bash -l {0}
         run: |
           set -e
-          # Create environment with MLflow and any runtime dependencies you want
+          # create env with mlflow
           mamba create -n mlflow-env python=3.9 mlflow -c conda-forge -y
 
-          # If you have additional dependencies, install them:
-          # - If you maintain environment.yml in repo:
-          #     mamba env update -n mlflow-env --file environment.yml
-          # - If you have requirements.txt:
+          # Initialize conda for this shell and activate the env.
+          # Using 'conda activate' avoids using the mamba-run wrapper that produced the `exec: --: invalid option` error.
+          eval "$(conda shell.bash hook)"
+          conda activate mlflow-env
+
+          # Install any pip requirements (run inside activated env)
           if [ -f requirements.txt ]; then
-            mamba run -n mlflow-env --no-capture-output pip install -r requirements.txt
+            pip install -r requirements.txt
           fi
 
       - name: Verify mlflow is available
         shell: bash -l {0}
         run: |
           set -e
-          mamba run -n mlflow-env --no-capture-output mlflow --version
-          # show python path inside env
-          mamba run -n mlflow-env --no-capture-output python -c "import sys; print(sys.executable)"
+          eval "$(conda shell.bash hook)"
+          conda activate mlflow-env
+
+          mlflow --version
+          python -c "import sys; print(sys.executable)"
 
       - name: Run your MLflow command or training script
         shell: bash -l {0}
         run: |
           set -e
+          eval "$(conda shell.bash hook)"
+          conda activate mlflow-env
+
           # Example: run an MLflow project (adjust to your project's command)
-          # Use mamba/conda run so the mlflow binary from the conda env is used
-          mamba run -n mlflow-env --no-capture-output mlflow run . -P some_param=1
+          mlflow run . -P some_param=1
 
           # Or run your script directly within the conda env:
-          # mamba run -n mlflow-env --no-capture-output python src/train.py --config config.yaml
+          # python src/train.py --config config.yaml
 
       - name: Post-job
         if: always()
