@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/170844685689649338/d33005bac06e442ea7a049fe8db2e24a/artifacts
+end_time: 1762927432804
+entry_point_name: ''
+experiment_id: '170844685689649338'
+lifecycle_stage: active
+run_id: d33005bac06e442ea7a049fe8db2e24a
+run_name: intrigued-hound-709
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1762927420532
+status: 3
+tags: []
+user_id: ACER

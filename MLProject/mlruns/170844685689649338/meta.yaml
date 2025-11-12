@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/170844685689649338
+creation_time: 1762414515319
+experiment_id: '170844685689649338'
+last_update_time: 1762414515319
+lifecycle_stage: active
+name: Stroke Prediction Basic

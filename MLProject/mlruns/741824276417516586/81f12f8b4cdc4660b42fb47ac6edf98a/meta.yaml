@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Tugas%20Tugas%20ASAH/MSML-Soraya%20Nakhbaty/membangun_model/mlruns/741824276417516586/81f12f8b4cdc4660b42fb47ac6edf98a/artifacts
+end_time: 1762926114315
+entry_point_name: ''
+experiment_id: '741824276417516586'
+lifecycle_stage: active
+run_id: 81f12f8b4cdc4660b42fb47ac6edf98a
+run_name: smiling-stag-176
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1762926101432
+status: 3
+tags: []
+user_id: ACER

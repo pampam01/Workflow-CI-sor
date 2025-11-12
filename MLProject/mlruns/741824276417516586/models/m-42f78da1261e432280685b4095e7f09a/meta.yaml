@@ -1,0 +1,10 @@
+artifact_location: file:///D:/Tugas%20Tugas%20ASAH/MSML-Soraya%20Nakhbaty/membangun_model/mlruns/741824276417516586/models/m-42f78da1261e432280685b4095e7f09a/artifacts
+creation_timestamp: 1762926101665
+experiment_id: '741824276417516586'
+last_updated_timestamp: 1762926114279
+model_id: m-42f78da1261e432280685b4095e7f09a
+model_type: null
+name: model
+source_run_id: 81f12f8b4cdc4660b42fb47ac6edf98a
+status: 2
+status_message: null

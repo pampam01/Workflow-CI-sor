@@ -1,0 +1,10 @@
+name: StrokePredictionCI
+
+# Menentukan environment yang akan digunakan (dari conda.yaml)
+conda_env: conda.yaml
+
+# Titik masuk (entry point) untuk menjalankan proyek
+entry_points:
+  main:
+    # Perintah yang akan dijalankan
+    command: "python modelling.py"
